@@ -1,6 +1,6 @@
 // Button selectors for different UI elements
 const SELECTORS = {
-    STUDY_BUTTON: '.study-button.acquire-mode',
+    STUDY_BUTTONS: '.study-button.acquire-mode',
     CHOICE_BUTTON: {
         KNOWN: '.choice-button.is-known',
         UNKNOWN: '.choice-button.is-unknown'
@@ -13,30 +13,34 @@ const SELECTORS = {
     PREV_BUTTON: '.prev-button',
     PAGER_NEXT_BUTTON: '.study-acquire-pager-component .next-button',
     PAGER_PREV_BUTTON: '.study-acquire-pager-component .prev-button',
-    RESULT_BUTTON: '.study-result-footer-component .base-button-component',
+    RESULT_BUTTONS: '.study-result-footer-component .base-button-component',
     QUIT_BUTTON: '.exam-header__inner .back-button'
-};
-
-// Button text mappings
-const BUTTON_TEXT = {
-    RANDOM: 'ランダム',
-    REVIEW: '復習',
-    NEXT: '次へ',
-    RETRY: 'もう一度',
-    QUIT: 'やめる',
-    TEST: '確認テスト'
 };
 
 class ButtonFinder {
     static findByText(selector, text) {
         const buttons = document.querySelectorAll(selector);
         return Array.from(buttons).find(button =>
-            button.textContent.trim().startsWith(text)
+            button.textContent.trim().includes(text)
         );
     }
 
-    static findStudyButton(text) {
-        return this.findByText(SELECTORS.STUDY_BUTTON, text);
+    static findStudyButtonByIndex(index) {
+        const buttons = document.querySelectorAll(SELECTORS.STUDY_BUTTONS);
+        return buttons[index] || null;
+    }
+
+    static findLeftButton() {
+        return this.findStudyButtonByIndex(0);
+    }
+
+    static findRightButton() {
+        return this.findStudyButtonByIndex(1);
+    }
+
+    static findResultButtonByIndex(index) {
+        const buttons = document.querySelectorAll(SELECTORS.RESULT_BUTTONS);
+        return buttons[index] || null;
     }
 
     static findChoiceButton(isKnown) {
@@ -50,16 +54,10 @@ class ButtonFinder {
     }
 
     static findNextButton() {
-        // Try finding normal next button
-        const normalNext = this.findByText(SELECTORS.NEXT_BUTTON, BUTTON_TEXT.NEXT);
+        const normalNext = document.querySelector(SELECTORS.NEXT_BUTTON);
         if (normalNext) return normalNext;
 
-        // Try finding result screen next button
-        return this.findByText(SELECTORS.RESULT_BUTTON, BUTTON_TEXT.NEXT);
-    }
-
-    static findResultButton(text) {
-        return this.findByText(SELECTORS.RESULT_BUTTON, text);
+        return document.querySelector(SELECTORS.PAGER_NEXT_BUTTON);
     }
 }
 
@@ -85,48 +83,53 @@ class KeyboardHandler {
         }
     }
 
-
     static handleLeftArrow() {
-        const randomButton = ButtonFinder.findStudyButton(BUTTON_TEXT.RANDOM);
-        if (randomButton) {
-            randomButton.click();
+        // Study mode - left button
+        const leftButton = ButtonFinder.findLeftButton();
+        if (leftButton) {
+            leftButton.click();
             return;
         }
 
+        // Choice mode - unknown button
         const unknownButton = ButtonFinder.findChoiceButton(false);
         if (unknownButton) {
             unknownButton.click();
             return;
         }
 
-        const retryButton = ButtonFinder.findResultButton(BUTTON_TEXT.RETRY);
+        // Result mode - retry button (left position)
+        const retryButton = ButtonFinder.findResultButtonByIndex(0);
         if (retryButton) {
             retryButton.click();
         }
     }
 
     static handleRightArrow() {
-        const reviewButton = ButtonFinder.findStudyButton(BUTTON_TEXT.REVIEW);
-        if (reviewButton) {
-            reviewButton.click();
+        // Study mode - right button
+        const rightButton = ButtonFinder.findRightButton();
+        if (rightButton) {
+            rightButton.click();
             return;
         }
 
+        // Choice mode - known button
         const knownButton = ButtonFinder.findChoiceButton(true);
         if (knownButton) {
             knownButton.click();
             return;
         }
 
-        const nextButton = ButtonFinder.findNextButton();
+        // Result mode - next button (right position)
+        const nextButton = ButtonFinder.findResultButtonByIndex(2);
         if (nextButton) {
             nextButton.click();
             return;
         }
 
-        const quitButton = ButtonFinder.findResultButton(BUTTON_TEXT.QUIT);
-        if (quitButton) {
-            quitButton.click();
+        const normalNextButton = ButtonFinder.findNextButton();
+        if (normalNextButton) {
+            normalNextButton.click();
         }
     }
 
@@ -143,7 +146,8 @@ class KeyboardHandler {
             return;
         }
 
-        const testButton = ButtonFinder.findResultButton(BUTTON_TEXT.TEST);
+        // Result mode - test button (middle position)
+        const testButton = ButtonFinder.findResultButtonByIndex(1);
         if (testButton) {
             testButton.click();
         }
@@ -170,7 +174,6 @@ document.addEventListener('keydown', function (event) {
         'ArrowRight': () => KeyboardHandler.handleRightArrow(),
         'ArrowUp': () => KeyboardHandler.handleUpArrow(),
         'ArrowDown': () => KeyboardHandler.handleDownArrow(),
-
         'Escape': () => KeyboardHandler.handleEscape()
     };
 
