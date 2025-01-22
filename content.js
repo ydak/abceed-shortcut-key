@@ -1,119 +1,181 @@
-document.addEventListener('keydown', function (event) {
-    // テキストコンテンツでボタンを特定する関数
-    function findButtonByText(text) {
-        const buttons = document.querySelectorAll('.study-button.acquire-mode');
+// Button selectors for different UI elements
+const SELECTORS = {
+    STUDY_BUTTON: '.study-button.acquire-mode',
+    CHOICE_BUTTON: {
+        KNOWN: '.choice-button.is-known',
+        UNKNOWN: '.choice-button.is-unknown'
+    },
+    FUNCTION_BUTTON: {
+        EXPLANATION: '.score-button-component',
+        SPEAKER: '.speaker-button-component'
+    },
+    NEXT_BUTTON: '.next-button',
+    PREV_BUTTON: '.prev-button',
+    PAGER_NEXT_BUTTON: '.study-acquire-pager-component .next-button',
+    PAGER_PREV_BUTTON: '.study-acquire-pager-component .prev-button',
+    RESULT_BUTTON: '.study-result-footer-component .base-button-component',
+    QUIT_BUTTON: '.exam-header__inner .back-button'
+};
+
+// Button text mappings
+const BUTTON_TEXT = {
+    RANDOM: 'ランダム',
+    REVIEW: '復習',
+    NEXT: '次へ',
+    RETRY: 'もう一度',
+    QUIT: 'やめる',
+    TEST: '確認テスト'
+};
+
+class ButtonFinder {
+    static findByText(selector, text) {
+        const buttons = document.querySelectorAll(selector);
         return Array.from(buttons).find(button =>
             button.textContent.trim().startsWith(text)
         );
     }
 
-    // 選択ボタンを特定する関数
-    function findChoiceButton(isKnown) {
-        const className = isKnown ? 'is-known' : 'is-unknown';
-        return document.querySelector(`.choice-button.${className}`);
+    static findStudyButton(text) {
+        return this.findByText(SELECTORS.STUDY_BUTTON, text);
     }
 
-    // 解説・音声ボタンを特定する関数
-    function findFunctionButton(type) {
-        if (type === 'explanation') {
-            return document.querySelector('.score-button-component');
-        } else if (type === 'speaker') {
-            return document.querySelector('.speaker-button-component');
+    static findChoiceButton(isKnown) {
+        const selector = isKnown ? SELECTORS.CHOICE_BUTTON.KNOWN : SELECTORS.CHOICE_BUTTON.UNKNOWN;
+        return document.querySelector(selector);
+    }
+
+    static findFunctionButton(type) {
+        const selector = SELECTORS.FUNCTION_BUTTON[type.toUpperCase()];
+        return selector ? document.querySelector(selector) : null;
+    }
+
+    static findNextButton() {
+        // Try finding normal next button
+        const normalNext = this.findByText(SELECTORS.NEXT_BUTTON, BUTTON_TEXT.NEXT);
+        if (normalNext) return normalNext;
+
+        // Try finding result screen next button
+        return this.findByText(SELECTORS.RESULT_BUTTON, BUTTON_TEXT.NEXT);
+    }
+
+    static findResultButton(text) {
+        return this.findByText(SELECTORS.RESULT_BUTTON, text);
+    }
+}
+
+class KeyboardHandler {
+    static handleEscape() {
+        const quitButton = document.querySelector(SELECTORS.QUIT_BUTTON);
+        if (quitButton) {
+            quitButton.click();
         }
-        return null;
     }
 
-    // 次へボタンを特定する関数
-    function findNextButton() {
-        // まず通常の次へボタンを探す
-        const nextButtons = document.querySelectorAll('.next-button');
-        const normalNextButton = Array.from(nextButtons).find(button =>
-            button.textContent.trim() === '次へ'
-        );
-        if (normalNextButton) return normalNextButton;
-
-        // 結果画面の次へボタンを探す
-        const resultButtons = document.querySelectorAll('.study-result-footer-component .base-button-component');
-        return Array.from(resultButtons).find(button =>
-            button.textContent.trim() === '次へ'
-        );
+    static handlePageUp() {
+        const prevButton = document.querySelector(SELECTORS.PAGER_PREV_BUTTON);
+        if (prevButton) {
+            prevButton.click();
+        }
     }
 
-    // 結果画面のボタンを特定する関数
-    function findResultButton(text) {
-        const buttons = document.querySelectorAll('.study-result-footer-component .base-button-component');
-        return Array.from(buttons).find(button =>
-            button.textContent.trim() === text
-        );
+    static handlePageDown() {
+        const nextButton = document.querySelector(SELECTORS.PAGER_NEXT_BUTTON);
+        if (nextButton) {
+            nextButton.click();
+        }
     }
 
-    switch (event.key) {
-        case 'ArrowLeft':
-            // 学習モード：ランダムボタン
-            const randomButton = findButtonByText('ランダム');
-            if (randomButton) {
-                randomButton.click();
-            } else {
-                // 問題モード：わからないボタン
-                const unknownButton = findChoiceButton(false);
-                if (unknownButton) {
-                    unknownButton.click();
-                } else {
-                    // 結果画面：もう一度ボタン
-                    const retryButton = findResultButton('もう一度');
-                    if (retryButton) {
-                        retryButton.click();
-                    }
-                }
-            }
-            break;
 
-        case 'ArrowRight':
-            // 学習モード：復習ボタン
-            const reviewButton = findButtonByText('復習');
-            if (reviewButton) {
-                reviewButton.click();
-            } else {
-                // 問題モード：わかるボタン
-                const knownButton = findChoiceButton(true);
-                if (knownButton) {
-                    knownButton.click();
-                } else {
-                    // 次へボタン
-                    const nextButton = findNextButton();
-                    if (nextButton) {
-                        nextButton.click();
-                    } else {
-                        // 結果画面：やめるボタン
-                        const quitButton = findResultButton('やめる');
-                        if (quitButton) {
-                            quitButton.click();
-                        }
-                    }
-                }
-            }
-            break;
+    static handleLeftArrow() {
+        const randomButton = ButtonFinder.findStudyButton(BUTTON_TEXT.RANDOM);
+        if (randomButton) {
+            randomButton.click();
+            return;
+        }
 
-        case 'ArrowUp':
-            // 解説ボタン
-            const explanationButton = findFunctionButton('explanation');
-            if (explanationButton) {
-                explanationButton.click();
-            } else {
-                // 結果画面：確認テストボタン
-                const testButton = findResultButton('確認テスト');
-                if (testButton) {
-                    testButton.click();
-                }
-            }
-            break;
+        const unknownButton = ButtonFinder.findChoiceButton(false);
+        if (unknownButton) {
+            unknownButton.click();
+            return;
+        }
 
-        case 'ArrowDown':
-            // 音声ボタン
-            const speakerButton = findFunctionButton('speaker');
-            if (speakerButton) {
-                speakerButton.click();
-            }
-            break;
+        const retryButton = ButtonFinder.findResultButton(BUTTON_TEXT.RETRY);
+        if (retryButton) {
+            retryButton.click();
+        }
+    }
+
+    static handleRightArrow() {
+        const reviewButton = ButtonFinder.findStudyButton(BUTTON_TEXT.REVIEW);
+        if (reviewButton) {
+            reviewButton.click();
+            return;
+        }
+
+        const knownButton = ButtonFinder.findChoiceButton(true);
+        if (knownButton) {
+            knownButton.click();
+            return;
+        }
+
+        const nextButton = ButtonFinder.findNextButton();
+        if (nextButton) {
+            nextButton.click();
+            return;
+        }
+
+        const quitButton = ButtonFinder.findResultButton(BUTTON_TEXT.QUIT);
+        if (quitButton) {
+            quitButton.click();
+        }
+    }
+
+    static handleUpArrow() {
+        const prevButton = document.querySelector(SELECTORS.PAGER_PREV_BUTTON);
+        if (prevButton && prevButton.style.display !== 'none') {
+            prevButton.click();
+            return;
+        }
+
+        const explanationButton = ButtonFinder.findFunctionButton('explanation');
+        if (explanationButton) {
+            explanationButton.click();
+            return;
+        }
+
+        const testButton = ButtonFinder.findResultButton(BUTTON_TEXT.TEST);
+        if (testButton) {
+            testButton.click();
+        }
+    }
+
+    static handleDownArrow() {
+        const nextButton = document.querySelector(SELECTORS.PAGER_NEXT_BUTTON);
+        if (nextButton && nextButton.style.display !== 'none') {
+            nextButton.click();
+            return;
+        }
+
+        const speakerButton = ButtonFinder.findFunctionButton('speaker');
+        if (speakerButton) {
+            speakerButton.click();
+        }
+    }
+}
+
+// Main event listener
+document.addEventListener('keydown', function (event) {
+    const keyHandlers = {
+        'ArrowLeft': () => KeyboardHandler.handleLeftArrow(),
+        'ArrowRight': () => KeyboardHandler.handleRightArrow(),
+        'ArrowUp': () => KeyboardHandler.handleUpArrow(),
+        'ArrowDown': () => KeyboardHandler.handleDownArrow(),
+
+        'Escape': () => KeyboardHandler.handleEscape()
+    };
+
+    const handler = keyHandlers[event.key];
+    if (handler) {
+        handler();
     }
 });
