@@ -1,6 +1,7 @@
 # Abceed Shortcut Key
 
 Abceedをキーボードで操作できるようにするChrome拡張機能です。
+下記は `TOEIC L&R TEST 出る単特急 金のフレーズ` 操作例です。
 
 ## 機能
 
