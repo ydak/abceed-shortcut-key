@@ -7,7 +7,7 @@
     "content_scripts": [
         {
             "matches": [
-                "*://*.abceed.com/*"
+                "https://app.abceed.com/*"
             ],
             "js": [
                 "content.js"

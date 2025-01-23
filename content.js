@@ -14,7 +14,7 @@ const SELECTORS = {
     PAGER_NEXT_BUTTON: '.study-acquire-pager-component .next-button',
     PAGER_PREV_BUTTON: '.study-acquire-pager-component .prev-button',
     RESULT_BUTTONS: '.study-result-footer-component .base-button-component',
-    QUIT_BUTTON: '.exam-header__inner .back-button'
+    QUIT_BUTTON: '.exam-header__inner .back-button, .back-button'
 };
 
 class ButtonFinder {
@@ -174,7 +174,9 @@ document.addEventListener('keydown', function (event) {
         'ArrowRight': () => KeyboardHandler.handleRightArrow(),
         'ArrowUp': () => KeyboardHandler.handleUpArrow(),
         'ArrowDown': () => KeyboardHandler.handleDownArrow(),
-        'Escape': () => KeyboardHandler.handleEscape()
+        'Escape': () => KeyboardHandler.handleEscape(),
+        'PageUp': () => KeyboardHandler.handlePageUp(),
+        'PageDown': () => KeyboardHandler.handlePageDown()
     };
 
     const handler = keyHandlers[event.key];
