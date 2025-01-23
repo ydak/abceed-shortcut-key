@@ -1,13 +1,21 @@
 {
     "manifest_version": 3,
     "name": "Abceed Shortcut Key",
-    "version": "1.0.0",
-    "description": "キーボードでabceedの学習ページにあるボタンを選択可能にする拡張機能。一旦は金のフレーズをひたすら周回学習するのが主な用途。",
-    "permissions": [],
+    "version": "0.1.0",
+    "description": "Abceedの学習ページで矢印キーを使用して効率的に学習を進めることができます。左右の矢印キーで問題の解答、上下の矢印キーで音声再生と解説の表示が可能です。",
+    "icons": {
+        "128": "images/icon128.png"
+    },
+    "action": {
+        "default_icon": {
+            "128": "images/icon128.png"
+        }
+    },
     "content_scripts": [
         {
             "matches": [
-                "https://app.abceed.com/*"
+                "https://app.abceed.com/books/*",
+                "https://app.abceed.com/study/*"
             ],
             "js": [
                 "content.js"
